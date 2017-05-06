@@ -1,0 +1,11 @@
+install Tomcat 8.0 on server
+install JSP (directions will vary based on version; instructions available on jsp website - normally, download jstl.jar and put in tomcat classpath)
+install mysql on server
+run naexpire.sql
+run calendar.sql
+load source code into Eclipse
+modify DBManager's getConnection() method with info for new server (address, login credentials)
+modify Utilities' sendConfirmation() and emailPassword() methods with details for new email server (address and credentials)
+build naexpire package to .jar
+place naexpire.jar and javax.mail.jar in project classpath on server (specific directory can be set manually or may vary depending on server stack) (different from classpath where JSP goes)
+place all .jsp files in root webapp folder (this will vary based on server stack)
