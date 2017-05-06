@@ -11,8 +11,48 @@
 <script src="js/jquery-3.1.1.min.js"></script>
 <script src="js/update-ajax.js"></script>
 <script>
+var update = function($td) { // ajax call to update value of column in DB for row entry
+	var newval = $td.children(".in").eq(0).val();
+	var tdid = $td.attr("id");
+	var res = tdid.split("-");
+	if (res.length > 3) {
+		res[2] = res[2].concat(res[3]);
+	}
+	$.get('AJAXer', {
+            value : newval,
+    		  column : res[2],
+    		  table: res[0],
+    		  id: res[1]
+    }, function(responseText) {
+            
+    });
+	var j = $td.children('.in').val();
+    $td.html(j);
+};
+$(document).on('click', '.done', function() {
+	update($(this).parent());
+});
 $(document).ready(function() {
 
+	var update = function($td) { // ajax call to update value of column in DB for row entry
+		var newval = $td.children(".in").eq(0).val();
+    	var tdid = $td.attr("id");
+    	var res = tdid.split("-");
+    	if (res.length > 3) {
+    		res[2] = res[2].concat(res[3]);
+    	}
+    	$.get('AJAXer', {
+                value : newval,
+        		  column : res[2],
+        		  table: res[0],
+        		  id: res[1]
+        }, function(responseText) {
+                
+        });
+    	var j = $td.children('.in').val();
+        $td.html(j);
+	};
+	
 	var hits = 0;
 	$(".table-element").click(function() {
 		if (hits % 2 == 0) {
@@ -20,26 +60,24 @@ $(document).ready(function() {
 	    	$(this).html('<input type="text" class="in" value="' + i + '" /> <span class="done">Done</span>');
 	        hits = hits + 1;
 	    }
-	    else {
-	    	var j = $(this).children('.in').val();
-	        $(this).html(j);
-	        hits = hits + 1;
-	    }
 	});
-	
 	$(".submit-all").click(function() {
 		$(".in").each(function() {
-			var k = $(this).val();
-			$(this).parent().html(k);
+			update($(this).parent());
 		});
 	});
 	
 	$(".new-password").click(function() {
-
+		alert("clicked new pw");
+		var tdid = $(this).attr("id");
+    	var res = tdid.split("-");
 		var r = confirm("Set new password?");
 	    if (r) {
-			alert("New password: " + newpw());
-	        $(this).text(fakehash());
+	    	$.get('JAJAXer', {
+	        		  id: res[1]
+	        }, function(responseText) {
+	        	alert("New password generated: " + responseText);
+	        });
 	    }
 	    else {
 	    	alert("Password will remain the same.");
@@ -48,98 +86,100 @@ $(document).ready(function() {
 
 	});
 	
-	function editfield() {
-		
-	}
-	
-	function submitedit() {
-		
-	}
-
-	function newpw() {
-	    var text = "";
-	    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-	    for( var i=0; i < 5; i++ )
-	        text += possible.charAt(Math.floor(Math.random() * possible.length));
-
-	    return text;
-	}
-
-	function fakehash() {
-
-		var text = "";
-	    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-	    for( var i=0; i < 16; i++ )
-	        text += possible.charAt(Math.floor(Math.random() * possible.length));
-
-	    return text;
-
-	}
-	
 });
 </script>
 </head>
+<%
+
+	Cookie cookie = null;
+	Cookie[] cookies = null;
+	cookies = request.getCookies();
+	boolean loggedin;
+	String first = "";
+	if( cookies != null ){
+	    for (int i = 0; i < cookies.length; i++){
+	       cookie = cookies[i];
+	       if(cookie.getName().equals("firstname")) {
+	      	 
+	      	 first=cookie.getValue();
+	      	 Cookie firstname = new Cookie("firstname", first);
+	   		 firstname.setMaxAge(60*60);
+	   		 response.addCookie(firstname);
+	      	 
+	       }
+	    }
+	    if (first.equals("")) {
+	    	response.sendRedirect("login.jsp");
+	    }
+	}
+	else {
+		
+		response.sendRedirect("login.jsp");
+		
+	}
+
+	String[] userColumns = { "id", "type", "email", "password", "firstname", "lastname", "registration-date", "last-login", "card-number", "card-expiration", "card-zip", "confirmed", "confirmation-code", "cart-id" };
+	String[] restaurantColumns = { "id", "name", "description", "registration-date", "address", "city", "state", "zip", "ownerid", "items", "pickup-time", "price", "pickup-max", "pickup-remaining", "phone-number" };
+	String[] menuColumns = { "id", "name", "description", "restaurantid", "price", "type" };
+	String[] dealColumns = { "id", "meal-id", "deal-price", "quantity", "restaurant-id" };
+	
+	String[] tableNames = { "users", "restaurants", "deals", "menuitems" };
+	
+	int i = 0;
+	
+%>
 <body>
-<div class="row">
-<div class="col-lg-12">
-	<div class="top-menu">
-		<span class="welcome">Welcome, Clinton!</span>
-		<span class="top-menu-item"><a href="logout.jsp">Log Out</a></span>
-		<span class="top-menu-item"><a href="stats.jsp">Stats</a></span>
-		<span class="top-menu-item"><a href="search.jsp">Search</a></span>
-		<span class="top-menu-item"><a href="browse.jsp">Browse</a></span>
-		<span class="top-menu-item"><a href="index.jsp">Home</a></span>
-	</div>
-</div>
-</div>
-<div class="row">
-	<div class="content">
-		<div class="col-lg-3">
-			<div class="left-menu">
-				<h4>Tables</h4>
-				<span class="left-menu-item"><a href="browse.jsp?table=users">Users</a></span><br />
-				<span class="left-menu-item"><a href="browse.jsp?table=restaurants">Restaurants</a></span><br />
-				<span class="left-menu-item"><a href="browse.jsp?table=menu">Menu Items</a></span><br />
-				<span class="left-menu-item"><a href="browse.jsp?table=deals">Deals</a></span>
-			</div>
-		</div>
-		<div class="col-lg-9">
-		<div class="content-main">
-			<% if (request.getParameter("table") == null) {
-				out.println("Please select a table from the list on the left.");
+<nav class="navbar navbar-inverse">
+	<div class="navbar-header">Welcome, <%= first %>!</div>
+	<ul class="nav navbar-nav navbar-right">
+		<li><a href="splash.jsp">Home</a></li>
+		<li><a href="browse.jsp">Browse</a></li>
+		<li><a href="updatesplash.jsp">Splash</a></li>
+		<li><a href="stats.jsp">Stats</a></li>
+		<li><a href="logout.jsp">Log Out</a></li>
+		<li>&nbsp;</li>
+		<li>;  ;</li>
+	</ul>
+</nav>
+<nav class="navbar navbar-inverse navbar-secondary-blue">
+<div class="navbar-header">Tables</div>
+<ul class="nav navbar-nav navbar-right">
+	<li><a href="browse.jsp?table=users">Users</a></li>
+	<li><a href="browse.jsp?table=restaurants">Restaurants</a></li>
+	<li><a href="browse.jsp?table=menu">Menu Items</a></li>
+	<li><a href="browse.jsp?table=deals">Deals</a></li>
+</ul>
+</nav>
+<div class="container">
+	<div class="row">
+		<div class="col-lg-12">
+			<% String pkey;
+			if (request.getParameter("table") == null) {
+				out.println("Please select a table from the list above.");
 			}
 			else if (request.getParameter("table").equals("users")) {
 				out.println("<h2 class=\"table-header\">Users table</h2>");
 				out.println("<table class=\"db-table\">");
-				out.println("<tr><th>id</th><th>Type</th><th>E-Mail</th><th>Password</th><th>Frst Name</th><th>Last Name</th><th>Registration Date</th><th>Last Login</th><th>Card Number</th><th>Card Expiration Date</th><th>Card Zip</th></tr>");
+				out.println("<tr><th>id</th><th>Type</th><th>E-Mail</th><th>Password</th><th>Frst Name</th><th>Last Name</th><th>Registration Date</th><th>Last Login</th><th>Card Number</th><th>Card Expiration Date</th><th>Card Zip</th><th>Confirmed</th><th>Confirmation Code</th><th>Cart ID</th></tr>");
 				DBManager dbm = new DBManager();
 				String[][] res = dbm.getUsers();
 				if (res == null) {
-					out.print("<tr>");
-					out.print("<td>2</td><td class=\"table-element\">stevekx86@gmail.com</td><td class=\"table-element\">customer</td><td class=\"new-password\">$2a$14$RHwEcB41ufx11GYZu6WjC.hLCDetXm8jjsd8O282gbtV.tT6/QYM2</td><td class=\"table-element\">Steve</td><td class=\"table-element\">King</td><td class=\"table-element\">2017-04-03</td><td></td><td></td><td></td><td></td>");
-					out.print("</tr>");
-					out.print("<tr>");
-					out.print("<td>3</td><td class=\"table-element\">xgh@asu.edu</td><td class=\"table-element\">customer</td><td class=\"new-password\">$14$.dE5b/UWlv2aOxD6febKQ.futfB2jeWF5xThfQZioNOF3Fvfr.M1a</td><td class=\"table-element\">food</td><td class=\"table-element\">fghd</td><td class=\"table-element\">2017-04-03</td><td></td><td></td><td></td><td></td>");
-					out.print("</tr>");
-					out.print("<tr>");
-					out.print("<td>4</td><td class=\"table-element\">dfd@ddc.edu</td><td class=\"table-element\">customer</td><td class=\"new-password\">$2a$14$3Eqdjbo5VWHOIJVXyyhQS.Y9cTyLJlFqHSwLLCLaVm5ymw4sxZP6e</td><td class=\"table-element\">weeer</td><td class=\"table-element\">weeee</td><td class=\"table-element\">2017-04-03</td><td></td><td></td><td></td><td></td>");
-					out.print("</tr>");
+					out.println("No records found.");
 				}
 				else {
 					for (String[] record : res) {
+						pkey = record[0];
 						out.println("<tr>");
-						int i = 0;
+						i = 0;
 						for (String rec : record) {
-							if (i == 0) {
-								out.println("<td class=\"new-password\">" + rec + "</td>");
+							if (i == 1 || i == 2 || i == 4 || i == 5) {
+								out.println("<td class=\"table-element\" id=\"users-" + pkey + "-" + userColumns[i] + "\">" + rec + "</td>");
 							}
-							else if (i == 0) {
-								out.println("<td>" + rec + "</td>");
+							else if (i==3) {
+								out.println("<td class=\"new-password\" id=\"users-" + pkey + "-" + userColumns[i] + "\">" + rec + "</td>");
 							}
 							else {
-								out.println("<td class=\"table-element\">" + rec + "</td>");
+								out.println("<td class=\"users-" + userColumns[i] + "\">" + rec + "</td>");
 							}
 							i++;
 						}
@@ -149,49 +189,90 @@ $(document).ready(function() {
 				out.println("</table><br />");
 				out.println("<button class=\"submit-all\">Submit</button>");			
 			}
-			else if (request.getParameter("table").equals("restaurants")) {
-				out.println("<h2 class=\"table-header\">Restaurants table</h2>");
+			else if (request.getParameter("table").equals("menu")) {
+				out.println("<h2 class=\"table-header\">Menu table</h2>");
 				out.println("<table class=\"db-table\">");
-				out.println("<tr><th>id</th><th>Name</th><th>Description</th><th>Registration Date</th><th>Address</th><th>City</th><th>State</th><th>Zip Code</th></tr>");
+				out.println("<tr><th>id</th><th>Name</th><th>Description</th><th>Restaurant ID</th><th>Price</th><th>Type</th></tr>");
 				DBManager dbm = new DBManager();
-				String[][] res = dbm.getRestaurants();
+				String[][] res = dbm.getMenu();
 				if (res == null) {
 					
 				}
 				else {
 					for (String[] record : res) {
+						pkey = record[0];
 						out.println("<tr>");
+						i = 0;
 						for (String rec : record) {
-							out.println("<td>" + rec + "</td>");
+							if (i == 1 || i == 2 || i == 4) {
+								out.println("<td class=\"table-element\" id=\"menuitems-" + pkey + "-" + menuColumns[i] + "\">" + rec + "</td>");
+							}
+							else {
+								out.println("<td id=\"menuitems-" + menuColumns[i] + "\">" + rec + "</td>");
+							}
+							i++;
 						}
 						out.println("</tr>");
 					}
 				}
 				out.println("</table>");
 			}
-			else if (request.getParameter("table").equals("menu")) {
-				out.println("<h2 class=\"table-header\">Menu Items table</h2>");
+			else if (request.getParameter("table").equals("restaurants")) {
+				out.println("<h2 class=\"table-header\">Restaurants table</h2>");
 				out.println("<table class=\"db-table\">");
-				out.println("<tr><th>id</th><th>Name</th><th>Registration Date</th><th>Address</th><th>City</th><th>State</th><th>Zip Code</th><th>Owner ID</th><th>items</th><th>Pickup Time</th><th>Price</th><th>pickup-max</th><th>pickup-remaining</th></tr>");
+				out.println("<tr><th>id</th><th>Name</th><th>Description</th><th>Registration Date</th><th>Address</th><th>City</th><th>State</th><th>Zip</th><th>Owner ID</th><th>Items</th><th>Pick-up Time</th><th>Price</th><th>Max Stock</th><th>Remaining Stock</th><th>Phone Number</th></tr>");
 				DBManager dbm = new DBManager();
-				String[][] res = dbm.getUsers();
+				String[][] res = dbm.getRestaurants();
 				if (res == null) {
-					
+					out.println("No records found.");
 				}
-				out.println("</table>");
+				else {
+					for (String[] record : res) {
+						pkey = record[0];
+						out.println("<tr>");
+						i = 0;
+						for (String rec : record) {
+							if (i == 1 || i == 2 || i == 4 || i == 5 || i == 6 || i == 7 || i == 10 || i == 14) {
+								out.println("<td class=\"table-element\" id=\"restaurants-" + pkey + "-" + restaurantColumns[i] + "\">" + rec + "</td>");
+							}
+							else {
+								out.println("<td id=\"restaurants-" + restaurantColumns[i] + "\">" + rec + "</td>");
+							}
+							i++;
+						}
+						out.println("</tr>");
+					}
+				}
+				out.println("</table><br />");
 			}
 			else if (request.getParameter("table").equals("deals")) {
 				out.println("<h2 class=\"table-header\">Deals table</h2>");
 				out.println("<table class=\"db-table\">");
 				out.println("<tr><th>id</th><th>Name</th><th>Description</th><th>Restaurant</th><th>Cost</th></tr>");
 				DBManager dbm = new DBManager();
-				String[][] res = dbm.getUsers();
+				String[][] res = dbm.getDeals();
 				if (res == null) {
-					
+					out.println("No records found.");
+				}
+				else {
+					for (String[] record : res) {
+						pkey = record[0];
+						out.println("<tr>");
+						i = 0;
+						for (String rec : record) {
+							if (i == 2 || i == 3) {
+								out.println("<td class=\"table-element\" id=\"deals-" + pkey + "-" + dealColumns[i] + "\">" + rec + "</td>");
+							}
+							else {
+								out.println("<td id=\"deals-" + dealColumns[i] + "\">" + rec + "</td>");
+							}
+							i++;
+						}
+						out.println("</tr>");
+					}
 				}
 				out.println("</table>");
 			} %>
-		</div>
 		</div>
 	</div>
 </div>

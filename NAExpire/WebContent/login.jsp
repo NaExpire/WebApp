@@ -19,10 +19,10 @@
 				
 			}
 			else if (request.getParameter("error").equals("un")) {
-				out.println("<span class=\"error\">Username not found.</span>");
+				out.println("<span class=\"error\">Username/Password not found.</span>");
 			}
-			else if (request.getParameter("error").equals("pw")) {
-				out.println("<span class=\"error\">Password does not match.</span>");
+			else if (request.getParameter("error").equals("admin")) {
+				out.println("<span class=\"error\">Username/Password not found.</span>");
 			}
 		%>
 	</form>
